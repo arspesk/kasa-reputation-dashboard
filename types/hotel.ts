@@ -5,6 +5,7 @@ export interface Hotel {
   city: string;
   website_url: string | null;
   created_at: string;
+  image_url: string | null;
 }
 
 export interface CreateHotelInput {

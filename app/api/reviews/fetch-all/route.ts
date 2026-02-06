@@ -125,6 +125,9 @@ export async function POST(request: NextRequest) {
 
     const successfulReviews: Array<{ rating: number; review_count: number }> = [];
 
+    let googleImageUrl: string | null = null;
+    let googleWebsiteUrl: string | null = null;
+
     // Process each platform result
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
@@ -146,6 +149,16 @@ export async function POST(request: NextRequest) {
                   review_count: data.data.review_count,
                 },
               };
+
+              // Capture Google image and website URL
+              if (platform === "google") {
+                if (data.data.image_url) {
+                  googleImageUrl = data.data.image_url;
+                }
+                if (data.data.website_url) {
+                  googleWebsiteUrl = data.data.website_url;
+                }
+              }
 
               // Prepare for database insertion
               reviewSnapshots.push({
@@ -212,6 +225,30 @@ export async function POST(request: NextRequest) {
       } else {
         saved_count = insertedSnapshots?.length || 0;
         console.log(`✓ Saved ${saved_count} review snapshots to database`);
+      }
+    }
+
+    // Update hotel image and website only if currently NULL
+    const updates: { image_url?: string; website_url?: string } = {};
+
+    if (googleImageUrl && !hotel.image_url) {
+      updates.image_url = googleImageUrl;
+    }
+
+    if (googleWebsiteUrl && !hotel.website_url) {
+      updates.website_url = googleWebsiteUrl;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      const { error: updateError } = await supabase
+        .from('hotels')
+        .update(updates)
+        .eq('id', hotel.id);
+
+      if (updateError) {
+        console.error('Failed to update hotel data:', updateError);
+      } else {
+        console.log('✓ Updated hotel data:', Object.keys(updates).join(', '));
       }
     }
 

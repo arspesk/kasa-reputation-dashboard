@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import HotelScoreCard from '@/components/HotelScoreCard';
 import type { Hotel, ReviewSnapshot, ReviewPlatform, ScoreData } from '@/types';
@@ -510,7 +511,8 @@ export default function HotelDetailPage({
           hotel={{
             name: hotel.name,
             city: hotel.city,
-            id: hotel.id
+            id: hotel.id,
+            image_url: hotel.image_url
           }}
           scores={scores}
           weightedScore={weightedScore}

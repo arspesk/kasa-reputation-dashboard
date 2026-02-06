@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { HotelScoreCardProps, ScoreData, ReviewPlatform } from "@/types";
 import { ArrowPathIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import HotelAvatar from "./HotelAvatar";
 
 /**
  * StarRating Component
@@ -216,9 +217,16 @@ export default function HotelScoreCard({
     <div className="bg-white rounded-kasa-lg shadow-md border border-kasa-neutral-light p-6">
       {/* Header Section */}
       <div className="flex items-start justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-kasa-black-500">{hotel.name}</h2>
-          <p className="text-gray-700 mt-1">{hotel.city}</p>
+        <div className="flex items-center gap-4">
+          <HotelAvatar
+            hotelName={hotel.name}
+            imageUrl={hotel.image_url}
+            size="lg"
+          />
+          <div>
+            <h2 className="text-2xl font-bold text-kasa-black-500">{hotel.name}</h2>
+            <p className="text-gray-700 mt-1">{hotel.city}</p>
+          </div>
         </div>
         <button
           onClick={handleRefresh}

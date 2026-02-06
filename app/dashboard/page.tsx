@@ -8,6 +8,7 @@ import LogoutButton from "@/components/LogoutButton";
 import AddHotelModal from "@/components/AddHotelModal";
 import EditHotelModal from "@/components/EditHotelModal";
 import ImportCSVModal from "@/components/ImportCSVModal";
+import HotelAvatar from "@/components/HotelAvatar";
 import toast from "react-hot-toast";
 import type { Hotel } from "@/types/hotel";
 import type { ReviewSnapshot, ReviewPlatform } from "@/types";
@@ -702,9 +703,11 @@ export default function DashboardPage() {
                         {/* Hotel Name with Icon */}
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 text-kasa-blue-300 flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                              {hotel.name.charAt(0).toUpperCase()}
-                            </div>
+                            <HotelAvatar
+                              hotelName={hotel.name}
+                              imageUrl={hotel.image_url}
+                              size="md"
+                            />
                             <Link
                               href={`/dashboard/hotels/${hotel.id}`}
                               className="text-sm font-medium text-kasa-black-500 hover:text-kasa-blue-300 transition-colors"

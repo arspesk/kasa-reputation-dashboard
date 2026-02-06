@@ -14,12 +14,16 @@ interface SerpAPIResponse {
     rating?: number;
     reviews?: number;
     place_id?: string;
+    thumbnail?: string;
+    website?: string;
   }>;
   place_results?: {
     title?: string;
     rating?: number;
     reviews?: number;
     place_id?: string;
+    thumbnail?: string;
+    website?: string;
   };
   error?: string;
 }
@@ -31,6 +35,8 @@ interface GoogleReviewResponse {
     normalized_rating: number; // 0-10 scale
     review_count: number;
     place_id?: string;
+    image_url?: string;
+    website_url?: string;
   };
   error?: string;
 }
@@ -131,6 +137,8 @@ export async function POST(request: NextRequest) {
     const rating = result.rating || 0;
     const reviewCount = result.reviews || 0;
     const placeId = result.place_id;
+    const imageUrl = result.thumbnail;
+    const websiteUrl = result.website;
 
     // Normalize rating from 1-5 scale to 0-10 scale
     const normalizedRating = rating * 2;
@@ -144,6 +152,8 @@ export async function POST(request: NextRequest) {
         normalized_rating: normalizedRating,
         review_count: reviewCount,
         place_id: placeId,
+        image_url: imageUrl,
+        website_url: websiteUrl,
       },
     } as GoogleReviewResponse);
 
