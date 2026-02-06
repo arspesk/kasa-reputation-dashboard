@@ -432,16 +432,6 @@ export default function GroupScoreCard({ group_id }: GroupScoreCardProps) {
 
   return (
     <div>
-      {/* Group Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-kasa-black-500">
-          {groupData?.name || 'Group Details'}
-        </h2>
-        <p className="text-sm text-gray-700 mt-1">
-          {hotelScores.length} {hotelScores.length === 1 ? 'hotel' : 'hotels'}
-        </p>
-      </div>
-
       {/* Warning for no review data */}
       {!isLoading && hotelScores.length > 0 && !hasAnyReviewData && (
         <div className="bg-orange-50 border border-orange-200 rounded-kasa-sm p-4 mb-4">

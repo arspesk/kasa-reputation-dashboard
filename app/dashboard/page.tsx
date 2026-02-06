@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [selectedHotels, setSelectedHotels] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<FilterType>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [dropdownOpenId, setDropdownOpenId] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -366,6 +367,17 @@ export default function DashboardPage() {
     return hotels.filter(hotel => {
       const reviews = hotelReviews.get(hotel.id);
 
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = hotel.name.toLowerCase().includes(query);
+        const matchesCity = hotel.city.toLowerCase().includes(query);
+        if (!matchesName && !matchesCity) {
+          return false;
+        }
+      }
+
+      // Apply status filter
       switch (filter) {
         case 'with_data':
           return reviews && reviews.platform_count && reviews.platform_count > 0;
@@ -377,7 +389,7 @@ export default function DashboardPage() {
           return true;
       }
     });
-  }, [hotels, hotelReviews, filter]);
+  }, [hotels, hotelReviews, filter, searchQuery]);
 
   const sortedHotels = useMemo(() => {
     return [...filteredHotels].sort((a, b) => {
@@ -544,21 +556,52 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Filter Bar */}
+        {/* Search and Filter Bar */}
         {hotels.length > 0 && (
-          <div className="mb-4">
-            <label className="text-sm font-medium text-kasa-black-500 mr-2">Show:</label>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as FilterType)}
-              className="inline-flex px-3 py-2 border border-kasa-neutral-medium rounded-kasa-sm text-sm focus:ring-4 focus:ring-offset-0 focus:ring-[rgba(6,19,50,0.2)] focus:border-kasa-blue-300 transition-colors h-kasa-button-md"
-            >
-              <option value="all">All Hotels</option>
-              <option value="with_data">With Data</option>
-              <option value="missing_data">Missing Data</option>
-              <option value="low_scores">Low Scores (&lt;6.0)</option>
-            </select>
-            <span className="ml-4 text-sm text-gray-700">
+          <div className="mb-4 flex items-center gap-4">
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search hotels by name or city..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-kasa-neutral-medium rounded-kasa-sm text-sm placeholder-gray-500 focus:ring-4 focus:ring-offset-0 focus:ring-[rgba(6,19,50,0.2)] focus:border-kasa-blue-300 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {/* Filter Dropdown */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-kasa-black-500">Show:</label>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as FilterType)}
+                className="inline-flex px-3 py-2 border border-kasa-neutral-medium rounded-kasa-sm text-sm focus:ring-4 focus:ring-offset-0 focus:ring-[rgba(6,19,50,0.2)] focus:border-kasa-blue-300 transition-colors h-kasa-button-md"
+              >
+                <option value="all">All Hotels</option>
+                <option value="with_data">With Data</option>
+                <option value="missing_data">Missing Data</option>
+                <option value="low_scores">Low Scores (&lt;6.0)</option>
+              </select>
+            </div>
+
+            {/* Results Count */}
+            <span className="text-sm text-gray-700 whitespace-nowrap">
               {filteredHotels.length} of {hotels.length} hotels
             </span>
           </div>

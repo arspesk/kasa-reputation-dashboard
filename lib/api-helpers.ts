@@ -184,3 +184,40 @@ export function calculateGroupAggregateScore(
 
   return Math.round((weightedSum / totalReviews) * 10) / 10;
 }
+
+/**
+ * Calculate group aggregate score for snapshots from a specific date
+ *
+ * Used for historical trend calculations where we need to compute the group's
+ * aggregate weighted score at a specific point in time. Takes all snapshots
+ * from a single date (across all hotels and platforms) and calculates the
+ * overall weighted average.
+ *
+ * @param snapshots - Array of review snapshots from a specific date
+ * @returns Weighted average score on 0-10 scale, or undefined if no reviews
+ *
+ * @example
+ * ```typescript
+ * // Snapshots from 2024-01-15
+ * const snapshots = [
+ *   { rating: 9.0, review_count: 500, platform: 'google', hotel_id: 'hotel-1' },
+ *   { rating: 8.0, review_count: 200, platform: 'tripadvisor', hotel_id: 'hotel-1' },
+ *   { rating: 7.5, review_count: 300, platform: 'google', hotel_id: 'hotel-2' }
+ * ];
+ *
+ * const score = calculateGroupAggregateForDate(snapshots);
+ * // Returns: 8.4 (weighted across all hotels and platforms)
+ * ```
+ */
+export function calculateGroupAggregateForDate(
+  snapshots: Array<{ rating: number; review_count: number }>
+): number | undefined {
+  if (snapshots.length === 0) return undefined;
+
+  const reviews = snapshots.map((s) => ({
+    rating: s.rating,
+    review_count: s.review_count,
+  }));
+
+  return calculateWeightedScore(reviews);
+}

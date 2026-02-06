@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { HotelScoreCardProps, ScoreData, ReviewPlatform } from "@/types";
-import { ArrowPathIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import HotelAvatar from "./HotelAvatar";
 
 /**
@@ -64,11 +64,8 @@ export default function HotelScoreCard({
   weightedScore,
   lastUpdated,
   onRefresh,
-  isLoading: externalIsLoading,
+  isLoading,
 }: HotelScoreCardProps) {
-  // Internal loading state for button interaction
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const isLoading = externalIsLoading ?? isRefreshing;
 
   /**
    * Color coding for scores (Kasa brand colors):
@@ -128,20 +125,6 @@ export default function HotelScoreCard({
     });
     return map;
   }, [scores]);
-
-  /**
-   * Refresh handler with loading state management
-   */
-  const handleRefresh = async () => {
-    if (isLoading) return;
-
-    setIsRefreshing(true);
-    try {
-      await onRefresh();
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
 
   const platforms: Array<{
     key: ReviewPlatform;
@@ -216,7 +199,7 @@ export default function HotelScoreCard({
   return (
     <div className="bg-white rounded-kasa-lg shadow-md border border-kasa-neutral-light p-6">
       {/* Header Section */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start mb-6">
         <div className="flex items-center gap-4">
           <HotelAvatar
             hotelName={hotel.name}
@@ -228,14 +211,6 @@ export default function HotelScoreCard({
             <p className="text-gray-700 mt-1">{hotel.city}</p>
           </div>
         </div>
-        <button
-          onClick={handleRefresh}
-          disabled={isLoading}
-          className="px-4 py-2 bg-kasa-blue-300 text-white rounded-kasa hover:bg-[#144a70] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 min-h-kasa-button-md"
-        >
-          <ArrowPathIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          {isLoading ? 'Refreshing...' : 'Refresh'}
-        </button>
       </div>
 
       {/* Weighted Score Section */}
@@ -320,9 +295,6 @@ export default function HotelScoreCard({
                 ) : (
                   <div>
                     <p className="text-sm text-gray-700 italic">No data</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Click refresh to fetch
-                    </p>
                   </div>
                 )}
               </div>
@@ -337,7 +309,7 @@ export default function HotelScoreCard({
           <DocumentTextIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
           <p className="text-lg font-medium mb-2">No reviews yet</p>
           <p className="text-sm">
-            Click the "Refresh" button to fetch reviews from all platforms
+            Click the "Refresh" button in the header to fetch reviews from all platforms
           </p>
         </div>
       )}

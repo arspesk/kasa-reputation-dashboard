@@ -19,6 +19,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 interface ChartDataPoint {
   timestamp: string;
@@ -427,7 +428,7 @@ export default function HotelDetailPage({
   return (
     <div className="min-h-screen bg-kasa-neutral-warm">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-kasa-neutral-light">
+      <header className="bg-white shadow-sm border-b border-kasa-neutral-light sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <Link
             href="/dashboard"
@@ -449,57 +450,70 @@ export default function HotelDetailPage({
             Back to Hotels
           </Link>
 
-          {/* Export Dropdown */}
-          <div className="relative export-dropdown">
+          <div className="flex items-center gap-3">
+            {/* Refresh Button */}
             <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="inline-flex items-center px-4 py-2 min-h-kasa-button-md border border-kasa-blue-300 text-kasa-blue-300 rounded-kasa hover:bg-kasa-neutral-light transition-colors font-medium gap-2 focus:ring-4 focus:ring-offset-0 focus:ring-[rgba(6,19,50,0.2)]"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="inline-flex items-center px-4 py-2 min-h-kasa-button-md bg-kasa-blue-300 text-white rounded-kasa hover:bg-[#144a70] transition-colors font-medium gap-2 focus:ring-4 focus:ring-offset-0 focus:ring-[rgba(6,19,50,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh reviews"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              Export
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <ArrowPathIcon className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </button>
 
-            {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-kasa-neutral-light rounded-kasa shadow-lg z-10">
-                <button
-                  onClick={handleExportCurrent}
-                  className="w-full px-4 py-2 text-left hover:bg-kasa-neutral-warm text-sm text-gray-700 rounded-t-kasa-sm"
+            {/* Export Dropdown */}
+            <div className="relative export-dropdown">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="inline-flex items-center px-4 py-2 min-h-kasa-button-md border border-kasa-blue-300 text-kasa-blue-300 rounded-kasa hover:bg-kasa-neutral-light transition-colors font-medium gap-2 focus:ring-4 focus:ring-offset-0 focus:ring-[rgba(6,19,50,0.2)]"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  Export Current Data
-                </button>
-                <button
-                  onClick={handleExportHistory}
-                  className="w-full px-4 py-2 text-left hover:bg-kasa-neutral-warm text-sm text-gray-700 rounded-b-kasa-sm"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                Export
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  Export Full History
-                </button>
-              </div>
-            )}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {showExportMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-kasa-neutral-light rounded-kasa shadow-lg z-10">
+                  <button
+                    onClick={handleExportCurrent}
+                    className="w-full px-4 py-2 text-left hover:bg-kasa-neutral-warm text-sm text-gray-700 rounded-t-kasa-sm"
+                  >
+                    Export Current Data
+                  </button>
+                  <button
+                    onClick={handleExportHistory}
+                    className="w-full px-4 py-2 text-left hover:bg-kasa-neutral-warm text-sm text-gray-700 rounded-b-kasa-sm"
+                  >
+                    Export Full History
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

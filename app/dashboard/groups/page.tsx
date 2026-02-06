@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { GroupWithDetails, HotelGroup, Hotel, ReviewSnapshot } from "@/types";
@@ -19,6 +19,7 @@ export default function GroupsPage() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState<GroupWithDetails | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     checkUser();
@@ -177,6 +178,31 @@ export default function GroupsPage() {
     }
   };
 
+  // Filter groups based on search query (searches group names and hotel names within groups)
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return groups;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return groups.filter(group => {
+      // Search in group name
+      if (group.name.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // Search in member hotel names
+      if (group.hotels && group.hotels.length > 0) {
+        return group.hotels.some(hotel =>
+          hotel.name.toLowerCase().includes(query) ||
+          hotel.city.toLowerCase().includes(query)
+        );
+      }
+
+      return false;
+    });
+  }, [groups, searchQuery]);
+
   return (
     <div className="min-h-screen bg-kasa-neutral-warm">
       {/* Header */}
@@ -230,6 +256,42 @@ export default function GroupsPage() {
           </button>
         </div>
 
+        {/* Search Bar */}
+        {!isLoading && groups.length > 0 && (
+          <div className="mb-6 flex items-center gap-4">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search groups or hotels..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-kasa-neutral-medium rounded-kasa-sm text-sm placeholder-gray-500 focus:ring-4 focus:ring-offset-0 focus:ring-[rgba(6,19,50,0.2)] focus:border-kasa-blue-300 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {/* Results Count */}
+            <span className="text-sm text-gray-700 whitespace-nowrap">
+              {filteredGroups.length} of {groups.length} groups
+            </span>
+          </div>
+        )}
+
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-12">
@@ -271,16 +333,49 @@ export default function GroupsPage() {
 
         {/* Groups Grid */}
         {!isLoading && groups.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-            {groups.map((group) => (
-              <GroupCard
-                key={group.id}
-                group={group}
-                onEdit={(g) => setEditingGroup(g)}
-                onDelete={handleDeleteGroup}
-              />
-            ))}
-          </div>
+          <>
+            {filteredGroups.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+                {filteredGroups.map((group) => (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    onEdit={(g) => setEditingGroup(g)}
+                    onDelete={handleDeleteGroup}
+                    onRefresh={loadGroups}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-kasa shadow-sm border border-kasa-neutral-light p-12 text-center">
+                <svg
+                  className="w-16 h-16 mx-auto mb-4 text-kasa-neutral-medium"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <h3 className="text-lg font-medium text-kasa-black-500 mb-2">
+                  No matching groups found
+                </h3>
+                <p className="text-gray-700 mb-4">
+                  Try adjusting your search query
+                </p>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="px-4 py-2 text-sm text-kasa-blue-300 hover:text-kasa-blue-200 font-medium"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
 

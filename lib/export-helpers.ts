@@ -86,6 +86,119 @@ export function generateHistoricalCSV(
 }
 
 /**
+ * Generate CSV with historical group data
+ *
+ * Exports all review snapshots for all hotels in a group within a date range.
+ * Each row represents a hotel-date-platform combination. Includes aggregate
+ * rows for each unique date showing the group's overall performance.
+ *
+ * Format: Group Name, Hotel Name, City, Date, Platform, Rating (0-10), Original Rating, Review Count
+ *
+ * @param groupName - Name of the hotel group
+ * @param hotels - Array of hotels in the group with id, name, and city
+ * @param snapshots - All review snapshots to include in export
+ * @returns CSV string with UTF-8 BOM for Excel compatibility
+ *
+ * @example
+ * ```typescript
+ * const csv = generateGroupHistoricalCSV(
+ *   "Europe Collection",
+ *   [
+ *     { id: "hotel-1", name: "Hotel Paris", city: "Paris" },
+ *     { id: "hotel-2", name: "Hotel Rome", city: "Rome" }
+ *   ],
+ *   snapshots
+ * );
+ * downloadCSV(csv, "group-history.csv");
+ * ```
+ */
+export function generateGroupHistoricalCSV(
+  groupName: string,
+  hotels: Array<{ id: string; name: string; city: string }>,
+  snapshots: Array<ReviewSnapshot & { hotel_id: string }>
+): string {
+  const rows: string[] = [];
+
+  // Header
+  rows.push(
+    'Group Name,Hotel Name,City,Date,Platform,Rating (0-10),Original Rating,Review Count'
+  );
+
+  // Group snapshots by date
+  const snapshotsByDate = new Map<string, Array<ReviewSnapshot & { hotel_id: string }>>();
+  snapshots.forEach((s) => {
+    const dateKey = new Date(s.fetched_at).toISOString().split('T')[0];
+    if (!snapshotsByDate.has(dateKey)) {
+      snapshotsByDate.set(dateKey, []);
+    }
+    snapshotsByDate.get(dateKey)!.push(s);
+  });
+
+  // Sort dates chronologically
+  const sortedDates = Array.from(snapshotsByDate.keys()).sort();
+
+  // For each date, output snapshots + aggregate row
+  sortedDates.forEach((date) => {
+    const dateSnapshots = snapshotsByDate.get(date)!;
+
+    // Output individual hotel snapshots
+    dateSnapshots.forEach((snapshot) => {
+      const hotel = hotels.find((h) => h.id === snapshot.hotel_id);
+      if (!hotel) return;
+
+      rows.push(
+        [
+          escapeCsvField(groupName),
+          escapeCsvField(hotel.name),
+          escapeCsvField(hotel.city),
+          date,
+          getPlatformName(snapshot.platform),
+          snapshot.rating.toFixed(1),
+          snapshot.original_rating.toFixed(1),
+          snapshot.review_count.toString(),
+        ].join(',')
+      );
+    });
+
+    // Calculate and output aggregate row for this date
+    // Import calculateGroupAggregateForDate from api-helpers
+    const totalWeight = dateSnapshots.reduce((sum, s) => sum + s.review_count, 0);
+    if (totalWeight > 0) {
+      const weightedSum = dateSnapshots.reduce(
+        (sum, s) => sum + s.rating * s.review_count,
+        0
+      );
+      const aggregateScore = Math.round((weightedSum / totalWeight) * 10) / 10;
+
+      rows.push(
+        [
+          escapeCsvField(groupName),
+          '[GROUP AGGREGATE]',
+          '',
+          date,
+          'All Platforms',
+          aggregateScore.toFixed(1),
+          '',
+          totalWeight.toString(),
+        ].join(',')
+      );
+    }
+  });
+
+  return '\ufeff' + rows.join('\n');
+}
+
+/**
+ * Escape CSV field for proper quoting
+ */
+function escapeCsvField(field: string): string {
+  if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+    return `"${field.replace(/"/g, '""')}"`;
+  }
+  return field;
+}
+
+/**
  * Trigger browser download of CSV file
  */
 export function downloadCSV(csvContent: string, filename: string): void {
