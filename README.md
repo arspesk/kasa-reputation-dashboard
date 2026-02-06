@@ -23,6 +23,16 @@ Multi-tenant hotel reputation platform aggregating reviews from Google Maps, Tri
 
 ## Quick Start
 
+### Option 1: Try Demo Portfolio (Ready-to-Go)
+
+Login with test account to explore a pre-populated portfolio:
+- **Email:** test@test.com
+- **Password:** Kasa23!
+
+This account includes 234 hotels ready for review fetching.
+
+### Option 2: Create Your Own Portfolio
+
 ```bash
 # Install dependencies
 npm install
@@ -36,9 +46,13 @@ SERPAPI_KEY=your_serpapi_key
 # 1. Open Supabase Dashboard → SQL Editor
 # 2. Run 001_initial_schema.sql
 # 3. Run 002_rls_policies.sql
+# 4. Run 003_add_hotel_images.sql
 
 # Start development server
 npm run dev
+
+# Import sample hotels (optional)
+# Use Import CSV button in dashboard with: tests/hotels_test_import.csv
 ```
 
 ## Commands
