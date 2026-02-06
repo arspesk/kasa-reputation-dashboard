@@ -59,6 +59,17 @@ export async function POST(request: NextRequest) {
 
     // Get SerpAPI key from environment
     const serpApiKey = process.env.SERPAPI_KEY;
+
+    // DEBUGGING: Log environment variable details
+    console.log('=== SERPAPI KEY DEBUG ===');
+    console.log('Key exists:', !!serpApiKey);
+    console.log('Key type:', typeof serpApiKey);
+    console.log('Key length:', serpApiKey?.length || 0);
+    console.log('Key first 10 chars:', serpApiKey?.substring(0, 10) || 'N/A');
+    console.log('Key last 10 chars:', serpApiKey?.substring(serpApiKey.length - 10) || 'N/A');
+    console.log('All env keys:', Object.keys(process.env).filter(k => k.includes('SERP')));
+    console.log('========================');
+
     if (!serpApiKey) {
       return NextResponse.json(
         {
@@ -89,8 +100,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log('=== SERPAPI RESPONSE DEBUG ===');
+    console.log('Status:', response.status);
+    console.log('Status Text:', response.statusText);
+    console.log('Headers:', Object.fromEntries(response.headers.entries()));
+    console.log('==============================');
+
     if (!response.ok) {
-      throw new Error(`SerpAPI request failed: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('SerpAPI Error Response Body:', errorText);
+      throw new Error(`SerpAPI request failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data: SerpAPIResponse = await response.json();
