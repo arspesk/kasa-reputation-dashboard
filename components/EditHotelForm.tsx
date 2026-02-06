@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Hotel, CreateHotelInput } from "@/types/hotel";
 
@@ -17,7 +17,19 @@ interface FormErrors {
   submit?: string;
 }
 
-const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+// Validate URL by attempting to construct a URL object
+// This is more reliable than regex and handles all valid URL formats
+const isValidUrl = (urlString: string): boolean => {
+  try {
+    // Add https:// if no protocol specified
+    const urlToTest = urlString.match(/^https?:\/\//i) ? urlString : `https://${urlString}`;
+    const url = new URL(urlToTest);
+    // Must have a valid hostname with at least one dot (e.g., example.com)
+    return url.hostname.includes('.');
+  } catch {
+    return false;
+  }
+};
 
 export default function EditHotelForm({
   hotel,
@@ -32,7 +44,7 @@ export default function EditHotelForm({
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   // Update form when hotel prop changes
   useEffect(() => {
@@ -57,7 +69,7 @@ export default function EditHotelForm({
 
     // Optional URL validation
     if (formData.website_url && formData.website_url.trim()) {
-      if (!URL_REGEX.test(formData.website_url.trim())) {
+      if (!isValidUrl(formData.website_url.trim())) {
         newErrors.website_url = "Please enter a valid URL";
       }
     }
@@ -142,6 +154,7 @@ export default function EditHotelForm({
       }
 
       // Success!
+      setIsLoading(false);
       onSuccess(data);
     } catch (error) {
       console.error("Unexpected error:", error);

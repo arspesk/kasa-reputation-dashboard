@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { HotelGroup, Hotel } from "@/types";
 import toast from "react-hot-toast";
@@ -23,6 +23,7 @@ export default function CreateGroupModal({
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const supabase = useMemo(() => createClient(), []);
 
   // Check if form is valid for submission
   const isFormValid = groupName.trim().length > 0;
@@ -64,7 +65,6 @@ export default function CreateGroupModal({
 
   const loadHotels = async () => {
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
       const { data: hotelsData, error: hotelsError } = await supabase
@@ -126,8 +126,6 @@ export default function CreateGroupModal({
     setIsSubmitting(true);
 
     try {
-      const supabase = createClient();
-
       // Check if group name already exists for this user
       const { data: existing } = await supabase
         .from("hotel_groups")

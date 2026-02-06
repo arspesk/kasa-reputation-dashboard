@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Hotel, ReviewSnapshot, ReviewPlatform, GroupWithDetails } from "@/types";
 import { calculateWeightedScore, calculateGroupAggregateScore } from "@/lib/api-helpers";
@@ -50,6 +50,7 @@ export default function GroupScoreCard({ group_id }: GroupScoreCardProps) {
     key: 'hotel_name',
     direction: 'asc'
   });
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     loadGroupData();
@@ -80,7 +81,6 @@ export default function GroupScoreCard({ group_id }: GroupScoreCardProps) {
 
   const loadGroupData = async () => {
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
       // Step 1: Fetch group with nested hotel members

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/client";
 import type { Hotel, CreateHotelInput } from "@/types/hotel";
@@ -34,7 +34,7 @@ export default function ImportCSVModal({
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState<ImportProgress | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   // Close modal on Escape key
   useEffect(() => {

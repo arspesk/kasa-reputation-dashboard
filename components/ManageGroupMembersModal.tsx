@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { GroupWithDetails, Hotel } from "@/types";
 import toast from "react-hot-toast";
@@ -27,6 +27,7 @@ export default function ManageGroupMembersModal({
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const supabase = useMemo(() => createClient(), []);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -61,7 +62,6 @@ export default function ManageGroupMembersModal({
 
   const loadHotelsAndMembers = async () => {
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
       // Load all user's hotels
@@ -110,8 +110,6 @@ export default function ManageGroupMembersModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    const supabase = createClient();
 
     try {
       // Determine which hotels to add and remove
