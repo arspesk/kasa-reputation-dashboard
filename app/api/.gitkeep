@@ -1,0 +1,7 @@
+# API routes will be implemented here
+# Structure:
+# /api/reviews/google
+# /api/reviews/tripadvisor
+# /api/reviews/booking
+# /api/reviews/expedia
+# /api/reviews/fetch-all
