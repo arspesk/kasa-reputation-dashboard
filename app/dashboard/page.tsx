@@ -412,8 +412,13 @@ export default function DashboardPage() {
           comparison = (reviewsA?.platform_count ?? 0) - (reviewsB?.platform_count ?? 0);
           break;
         case 'updated':
-          const dateA = reviewsA?.last_updated ? new Date(reviewsA.last_updated).getTime() : 0;
-          const dateB = reviewsB?.last_updated ? new Date(reviewsB.last_updated).getTime() : 0;
+          // Use last_updated if available, otherwise fall back to created_at
+          const dateA = reviewsA?.last_updated
+            ? new Date(reviewsA.last_updated).getTime()
+            : new Date(a.created_at).getTime();
+          const dateB = reviewsB?.last_updated
+            ? new Date(reviewsB.last_updated).getTime()
+            : new Date(b.created_at).getTime();
           comparison = dateA - dateB;
           break;
       }
