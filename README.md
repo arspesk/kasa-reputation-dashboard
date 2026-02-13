@@ -100,5 +100,4 @@ weighted_score = sum(rating × review_count) / sum(review_count)
 ## Documentation
 
 - **CLAUDE.md** - Development guide for Claude Code
-- **Case_Study_AI_Specialist.md** - Original requirements
 - **/sql/README.md** - Database setup instructions
